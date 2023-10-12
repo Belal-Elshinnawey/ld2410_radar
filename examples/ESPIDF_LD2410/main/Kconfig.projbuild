@@ -1,0 +1,18 @@
+menu "Radar Control Configuration"
+    config RADAR_UART_NUM
+        int "Door Control GPIO"
+        range 0 2
+        default 1
+        help
+            UART  Number to use for radar.
+    config RADAR_UART_TX
+        int "Radar TX PIN"
+        default 17
+        help
+            UART TX Connected to Radar.
+    config RADAR_UART_RX
+        int "Radar RX PIN"
+        default 16
+        help
+            UART RX Connected to Radar.
+endmenu

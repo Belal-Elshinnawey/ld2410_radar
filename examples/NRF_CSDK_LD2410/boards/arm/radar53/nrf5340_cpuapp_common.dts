@@ -1,0 +1,186 @@
+#include "radar53_cpuapp_common-pinctrl.dtsi"
+
+/ {
+
+	chosen {
+		zephyr,bt-hci-rpmsg-ipc = &ipc0;
+		nordic,802154-spinel-ipc = &ipc0;
+		// zephyr,ieee802154 = &ieee802154;
+	};
+
+
+	gpio_fwd: nrf-gpio-forwarder {
+		compatible = "nordic,nrf-gpio-forwarder";
+		status = "okay";
+		uart {
+			gpios = <&gpio1 1 0>, <&gpio1 0 0>, <&gpio0 11 0>, <&gpio0 10 0>;
+		};
+	};
+
+	button {
+		compatible = "gpio-keys";
+		resetbut: resetbut {
+			gpios = <&gpio0 17 GPIO_ACTIVE_HIGH>;
+			label = "PIR interrupt pin";
+		};
+	};
+
+	buttons {
+		compatible = "gpio-keys";
+		button0: button_0 { 
+			gpios = <&gpio0 12 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Push button switch 0";
+		};
+		button1: button_1 {
+			gpios = <&gpio0 13 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Push button switch 1";
+		};
+		button2: button_2 {
+			gpios = <&gpio0 14 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Push button switch 2";
+		};
+		button3: button_3 {
+			gpios = <&gpio0 9 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Push button switch 3";
+		};
+	};
+
+	aliases {
+		resetmodem = &resetbut;
+		sw0 = &button0;
+		sw1 = &button1;
+		sw2 = &button2;
+		sw3 = &button3;
+		watchdog0 = &wdt0;
+	};
+
+
+};
+
+&adc {
+	status = "okay";
+};
+
+&gpiote {
+	status = "okay";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&timer0 {
+	status = "okay";
+};
+
+&timer1 {
+	status = "okay";
+};
+
+&timer2 {
+	status = "okay";
+};
+
+&i2c2 {
+	compatible = "nordic,nrf-twim";
+	status = "okay";
+	pinctrl-0 = <&i2c0_default>;
+	pinctrl-1 = <&i2c0_sleep>;
+	clock-frequency = <400000>;
+	pinctrl-names = "default", "sleep";
+	ds3231: ds3231@68 {
+		status = "okay";
+		compatible = "maxim,ds3231";
+		reg = <0x68>;
+		isw-gpios = <&gpio0 31 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+	};
+};
+// &uart0 {
+// 	status = "okay";
+// 	current-speed = <115200>;
+// 	parity = "none";
+// 	pinctrl-0 = <&uart1_default>;
+// 	pinctrl-1 = <&uart1_sleep>;
+// 	pinctrl-names = "default", "sleep";
+// 	gsm: gsm-modem {
+// 		compatible = "zephyr,gsm-ppp";
+// 	};
+// };
+
+&uart1 {
+	status = "okay";
+	current-speed = <115200>;
+	parity = "none";
+	pinctrl-0 = <&uart1_default>;
+	pinctrl-1 = <&uart1_sleep>;
+	pinctrl-names = "default", "sleep";
+
+};
+
+&flash0 {
+
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			label = "mcuboot";
+			reg = <0x00000000 0x00010000>;
+		};
+		slot0_partition: partition@10000 {
+			label = "image-0";
+		};
+		// slot0_ns_partition: partition@50000 {
+		// 	label = "image-0-nonsecure";
+		// };
+		// slot1_partition: partition@80000 {
+		// 	label = "image-1";
+		// };
+		// slot1_ns_partition: partition@c0000 {
+		// 	label = "image-1-nonsecure";
+		// };
+		/* 0xf0000 to 0xf7fff reserved for TF-M partitions */
+		storage_partition: partition@f8000 {
+			label = "storage";
+			reg = <0x000f8000 0x00008000>;
+		};
+	};
+};
+
+// &ieee802154 {
+// 	status = "okay";
+// };
+
+zephyr_udc0: &usbd {
+	compatible = "nordic,nrf-usbd";
+	status = "okay";
+};
+
+/ {
+
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		sram0_image: image@20000000 {
+			/* Zephyr image(s) memory */
+		};
+
+		sram0_s: image_s@20000000 {
+			/* Secure image memory */
+		};
+
+		// sram0_ns: image_ns@20040000 {
+		// 	/* Non-Secure image memory */
+		// };
+	};
+};
+
+/* Include partition configuration file */
+#include "nrf5340_cpuapp_partition_conf.dts"
